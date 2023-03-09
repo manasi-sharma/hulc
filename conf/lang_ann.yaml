@@ -26,9 +26,9 @@ compute_tsne: false
 
 hydra:
   run:
-    dir: ${log_dir}/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}_${hydra.job.override_dirname}
+    dir: ${log_dir}/hulc/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}_${hydra.job.override_dirname}
   sweep:
-    dir: ${log_dir}/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: ${log_dir}/hulc/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${hydra.job.override_dirname}
   job:
     config:

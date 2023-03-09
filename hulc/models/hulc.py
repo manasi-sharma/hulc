@@ -213,6 +213,7 @@ class Hulc(pl.LightningModule, CalvinBaseModel):
 
         if self.trainer.max_steps and self.trainer.max_steps < max_estimated_steps:  # type: ignore
             return self.trainer.max_steps  # type: ignore
+
         return max_estimated_steps
 
     def compute_warmup(self, num_training_steps: int, num_warmup_steps: Union[int, float]) -> Tuple[int, int]:
@@ -866,6 +867,7 @@ class Hulc(pl.LightningModule, CalvinBaseModel):
                 self.plan, self.latent_goal = self.get_pp_plan_lang(obs, embedded_lang)
             else:
                 self.plan, self.latent_goal = self.get_pp_plan_vision(obs, goal)
+                print()
         # use plan to predict actions with current observations
         action = self.predict_with_plan(obs, self.latent_goal, self.plan)
         self.rollout_step_counter += 1

@@ -85,7 +85,7 @@ def evaluate_policy(model, env, epoch, eval_log_dir=None, debug=False, create_pl
     Returns:
         Dictionary with results
     """
-    conf_dir = Path(__file__).absolute().parents[2] / "conf"
+    conf_dir = Path(__file__).absolute().parents[3] / "conf"
     task_cfg = OmegaConf.load(conf_dir / "callbacks/rollout/tasks/new_playtable_tasks.yaml")
     task_oracle = hydra.utils.instantiate(task_cfg)
     val_annotations = OmegaConf.load(conf_dir / "annotations/new_playtable_validation.yaml")
@@ -100,13 +100,22 @@ def evaluate_policy(model, env, epoch, eval_log_dir=None, debug=False, create_pl
     if not debug:
         eval_sequences = tqdm(eval_sequences, position=0, leave=True)
 
+    i = 0
+
+    #import pdb;pdb.set_trace()
     for initial_state, eval_sequence in eval_sequences:
+        #t1= time.time()
         result = evaluate_sequence(env, model, task_oracle, initial_state, eval_sequence, val_annotations, plans, debug)
         results.append(result)
         if not debug:
             eval_sequences.set_description(
                 " ".join([f"{i + 1}/5 : {v * 100:.1f}% |" for i, v in enumerate(count_success(results))]) + "|"
             )
+        #print("\n\n\nTIMEEE: ", time.time()-t1)
+        #import pdb;pdb.set_trace()
+        i += 1
+        #if i == 5:
+        #    break
 
     if create_plan_tsne:
         create_tsne(plans, eval_log_dir, epoch)
@@ -130,7 +139,10 @@ def evaluate_sequence(env, model, task_checker, initial_state, eval_sequence, va
         print(f"Evaluating sequence: {' -> '.join(eval_sequence)}")
         print("Subtask: ", end="")
     for subtask in eval_sequence:
+        #t1= time.time()
         success = rollout(env, model, task_checker, subtask, val_annotations, plans, debug)
+        #print("\n\n\nTIMEEE: ", time.time()-t1)
+        #import pdb;pdb.set_trace()
         if success:
             success_counter += 1
         else:
@@ -151,8 +163,12 @@ def rollout(env, model, task_oracle, subtask, val_annotations, plans, debug):
     model.reset()
     start_info = env.get_info()
 
+    #import pdb;pdb.set_trace()
     for step in range(EP_LEN):
+        #t1= time.time()
         action = model.step(obs, lang_annotation)
+        #print("\n\n\nTimeeee: ", time.time()-t1)
+        #import pdb;pdb.set_trace()
         obs, _, _, current_info = env.step(action)
         if debug:
             img = env.render(mode="rgb_array")

@@ -16,6 +16,8 @@ from omegaconf import OmegaConf
 import pyhash
 import torch
 
+import hulc
+
 hasher = pyhash.fnv1_32()
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,7 @@ def get_default_model_and_env(train_folder, dataset_path, checkpoint, env=None, 
     cfg = OmegaConf.load(train_cfg_path)
     lang_folder = cfg.datamodule.datasets.lang_dataset.lang_folder
     if not hydra.core.global_hydra.GlobalHydra.instance().is_initialized():
-        hydra.initialize("../../conf/datamodule/datasets")
+        hydra.initialize("../../../conf/datamodule/datasets")
     # we don't want to use shm dataset for evaluation
     datasets_cfg = hydra.compose("vision_lang.yaml", overrides=["lang_dataset.lang_folder=" + lang_folder])
     # since we don't use the trainer during inference, manually set up data_module
@@ -36,6 +38,40 @@ def get_default_model_and_env(train_folder, dataset_path, checkpoint, env=None, 
     data_module.prepare_data()
     data_module.setup()
     dataloader = data_module.val_dataloader()
+    dataset = dataloader.dataset.datasets["lang"]
+    device = torch.device(f"cuda:{device_id}")
+
+    if env is None:
+        rollout_cfg = OmegaConf.load(Path(__file__).parents[3] / "conf/callbacks/rollout/default.yaml")
+        env = hydra.utils.instantiate(rollout_cfg.env_cfg, dataset, device, show_gui=False)
+
+    checkpoint = format_sftp_path(checkpoint)
+    print(f"Loading model from {checkpoint}")
+    # import the model class that was used for the training
+    model_cls = locate(cfg.model._target_)
+    model = model_cls.load_from_checkpoint(checkpoint)
+    model.load_lang_embeddings(dataset.abs_datasets_dir / dataset.lang_folder / "embeddings.npy")
+    model.freeze()
+    if cfg.model.action_decoder.get("load_action_bounds", False):
+        model.action_decoder._setup_action_bounds(cfg.datamodule.root_data_dir, None, None, True)
+    model = model.cuda(device)
+    print("Successfully loaded model.")
+
+    return model, env, data_module
+
+
+def get_train_model_and_env(train_folder, dataset_path, checkpoint, env=None, device_id=0):
+    train_cfg_path = Path(train_folder) / ".hydra/config.yaml"
+    train_cfg_path = format_sftp_path(train_cfg_path)
+    cfg = OmegaConf.load(train_cfg_path)
+    lang_folder = cfg.datamodule.datasets.lang_dataset.lang_folder
+    if not hydra.core.global_hydra.GlobalHydra.instance().is_initialized():
+        hydra.initialize("../../conf/datamodule/datasets")
+    # we don't want to use shm dataset for evaluation
+    import pdb;pdb.set_trace()
+    data_module = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
+
+    dataloader = data_module.train_dataloader()
     dataset = dataloader.dataset.datasets["lang"]
     device = torch.device(f"cuda:{device_id}")
 
@@ -53,6 +89,7 @@ def get_default_model_and_env(train_folder, dataset_path, checkpoint, env=None, 
     if cfg.model.action_decoder.get("load_action_bounds", False):
         model.action_decoder._setup_action_bounds(cfg.datamodule.root_data_dir, None, None, True)
     model = model.cuda(device)
+    import pdb;pdb.set_trace()
     print("Successfully loaded model.")
 
     return model, env, data_module

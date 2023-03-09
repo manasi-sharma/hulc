@@ -34,6 +34,7 @@ def train(cfg: DictConfig) -> None:
     """
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(cfg.seed, workers=True)  # type: ignore
+    import pdb;pdb.set_trace()
     datamodule = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     chk = get_last_checkpoint(Path.cwd())
 
@@ -49,7 +50,9 @@ def train(cfg: DictConfig) -> None:
     log_rank_0("Repo commit hash: {}".format(get_git_commit_hash(Path(hydra.utils.to_absolute_path(__file__)))))
     log_rank_0(print_system_env_info())
 
+    #import pdb;pdb.set_trace()
     train_logger = setup_logger(cfg, model)
+    #import pdb;pdb.set_trace()
     callbacks = setup_callbacks(cfg.callbacks)
     lr_logger = LearningRateMonitor(logging_interval="step")
     callbacks.append(lr_logger)
