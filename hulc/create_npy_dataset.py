@@ -36,6 +36,7 @@ def train(cfg: DictConfig) -> None:
     """
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(cfg.seed, workers=True)  # type: ignore
+    datamodule = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     """device_id = 0
     data_module = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     data_module.prepare_data()
