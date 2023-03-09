@@ -69,7 +69,7 @@ class PlanRecognitionTransformersNetwork(nn.Module):
         self.hidden_size = fc_hidden_size
         self.position_embedding = position_embedding
         self.encoder_normalize = encoder_normalize
-        self.positional_normalize = positional_normalize
+        self.positional_normalize = True #positional_normalize
         mod = self.in_features % num_heads
         if mod != 0:
             print(f"Padding for Num of Heads : {num_heads}")
