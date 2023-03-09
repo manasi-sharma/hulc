@@ -44,7 +44,7 @@ def train(cfg: DictConfig) -> None:
     dataset = dataloader.dataset.datasets["lang"]
     device = torch.device(f"cuda:{device_id}")
 
-    import pdb;pdb.set_trace()
+    #import pdb;pdb.set_trace()
 
     checkpoint = Path('/iliad/u/manasis/hulc/checkpoints/HULC_ABCD_D/saved_models/HULC_ABCD_D.ckpt')
     model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(checkpoint.as_posix())
