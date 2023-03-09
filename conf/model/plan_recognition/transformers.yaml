@@ -8,6 +8,6 @@ plan_features: ???
 action_space: ${datamodule.action_space}
 dropout_p: 0.1
 encoder_normalize: false
-positional_normalize: false
+positional_normalize: true
 position_embedding: true
 max_position_embeddings: ${datamodule.datasets.lang_dataset.max_window_size}
