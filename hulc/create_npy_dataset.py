@@ -36,7 +36,7 @@ def train(cfg: DictConfig) -> None:
     """
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(cfg.seed, workers=True)  # type: ignore
-    device_id = 0
+    """device_id = 0
     data_module = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     data_module.prepare_data()
     data_module.setup()
@@ -49,13 +49,14 @@ def train(cfg: DictConfig) -> None:
     checkpoints = [Path('/iliad/u/manasis/hulc/checkpoints/HULC_ABCD_D/saved_models/HULC_ABCD_D.ckpt')]
     model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(checkpoints.as_posix())
 
-    import pdb;pdb.set_trace()
+    import pdb;pdb.set_trace()"""
 
-    """chk = get_last_checkpoint(Path.cwd())
+    chk = get_last_checkpoint(Path.cwd())
 
     # Load Model
     if chk is not None:
         model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(chk.as_posix())
+        import pdb;pdb.set_trace()
     else:
         model = hydra.utils.instantiate(cfg.model)
         if "pretrain_chk" in cfg:
@@ -89,7 +90,7 @@ def train(cfg: DictConfig) -> None:
     trainer = Trainer(**trainer_args)
 
     # Start training
-    trainer.fit(model, datamodule=datamodule, ckpt_path=chk)  # type: ignore"""
+    trainer.fit(model, datamodule=datamodule, ckpt_path=chk)  # type: ignore
     pass
 
 
