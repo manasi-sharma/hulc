@@ -36,7 +36,6 @@ def train(cfg: DictConfig) -> None:
     """
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(cfg.seed, workers=True)  # type: ignore
-    datamodule = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     """device_id = 0
     data_module = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     data_module.prepare_data()
@@ -53,6 +52,7 @@ def train(cfg: DictConfig) -> None:
     import pdb;pdb.set_trace()"""
 
     chk = get_last_checkpoint(Path.cwd())
+    import pdb;pdb.set_trace()
 
     # Load Model
     if chk is not None:
@@ -63,6 +63,7 @@ def train(cfg: DictConfig) -> None:
         if "pretrain_chk" in cfg:
             initialize_pretrained_weights(model, cfg)
 
+    datamodule = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     log_rank_0(f"Training with the following config:\n{OmegaConf.to_yaml(cfg)}")
     log_rank_0("Repo commit hash: {}".format(get_git_commit_hash(Path(hydra.utils.to_absolute_path(__file__)))))
     log_rank_0(print_system_env_info())
