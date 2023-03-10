@@ -40,7 +40,7 @@ def train(cfg: DictConfig) -> None:
     data_module = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     data_module.prepare_data()
     data_module.setup()
-    dataloader = data_module.train_dataloader()["vis"]
+    dataloader = data_module.train_dataloader()["lang"]
     #dataset = dataloader.dataset.datasets["lang"]
     #device = torch.device(f"cuda:{device_id}")
 
@@ -50,7 +50,29 @@ def train(cfg: DictConfig) -> None:
     model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(checkpoint.as_posix())
 
     for i, batch in enumerate(dataloader):
-        #batch = batch["lang"]
+        perceptual_emb = model.perceptual_encoder(
+                batch["rgb_obs"], batch["depth_obs"], batch["robot_obs"]
+            )
+        latent_goal = model.language_goal(batch["lang"])
+        
+        # ------------Plan Proposal------------ #
+        pp_state = model.plan_proposal(perceptual_emb[:, 0], latent_goal)
+        pp_dist = model.dist.get_dist(pp_state)
+        sampled_plan_pp = model.dist.sample_latent_plan(pp_dist)
+
+        # ------------Plan Recognition------------ #
+        pr_state, seq_feat = model.plan_recognition(perceptual_emb)
+        pr_dist = model.dist.get_dist(pr_state)
+        sampled_plan_pr = pr_dist.rsample()  # sample from recognition net
+        if model.dist.dist == "discrete":
+            sampled_plan_pr = torch.flatten(sampled_plan_pr, start_dim=-2, end_dim=-1)
+        
+        import pdb;pdb.set_trace()
+
+        """sampled_plan = pr_dist.rsample()  # sample from recognition net
+        if self.dist.dist == "discrete":
+            sampled_plan = torch.flatten(sampled_plan, start_dim=-2, end_dim=-1)"""
+
         import pdb;pdb.set_trace()
 
     """chk = get_last_checkpoint(Path.cwd())
