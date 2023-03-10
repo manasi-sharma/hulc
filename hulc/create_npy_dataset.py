@@ -40,7 +40,7 @@ def train(cfg: DictConfig) -> None:
     data_module = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     data_module.prepare_data()
     data_module.setup()
-    dataloader = data_module.val_dataloader()
+    dataloader = data_module.train_dataloader()
     dataset = dataloader.dataset.datasets["lang"]
     device = torch.device(f"cuda:{device_id}")
 
@@ -49,7 +49,8 @@ def train(cfg: DictConfig) -> None:
     checkpoint = Path('/iliad/u/manasis/hulc/checkpoints/HULC_ABCD_D/saved_models/HULC_ABCD_D.ckpt')
     model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(checkpoint.as_posix())
 
-    import pdb;pdb.set_trace()
+    for i, batch in enumerate(dataloader):
+        import pdb;pdb.set_trace()
 
     """chk = get_last_checkpoint(Path.cwd())
     import pdb;pdb.set_trace()
