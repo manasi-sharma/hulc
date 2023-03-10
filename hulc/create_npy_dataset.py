@@ -50,7 +50,7 @@ def train(cfg: DictConfig) -> None:
     model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(checkpoint.as_posix())
 
     for i, batch in enumerate(dataloader):
-        batch = batch["lang"]
+        #batch = batch["lang"]
         import pdb;pdb.set_trace()
 
     """chk = get_last_checkpoint(Path.cwd())
