@@ -41,8 +41,8 @@ def train(cfg: DictConfig) -> None:
     data_module.prepare_data()
     data_module.setup()
     dataloader = data_module.train_dataloader()
-    dataset = dataloader.dataset.datasets["lang"]
-    device = torch.device(f"cuda:{device_id}")
+    #dataset = dataloader.dataset.datasets["lang"]
+    #device = torch.device(f"cuda:{device_id}")
 
     #import pdb;pdb.set_trace()
 
@@ -50,6 +50,7 @@ def train(cfg: DictConfig) -> None:
     model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(checkpoint.as_posix())
 
     for i, batch in enumerate(dataloader):
+        batch = batch["lang"]
         import pdb;pdb.set_trace()
 
     """chk = get_last_checkpoint(Path.cwd())
