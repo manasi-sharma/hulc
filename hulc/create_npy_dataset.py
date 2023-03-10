@@ -68,55 +68,6 @@ def train(cfg: DictConfig) -> None:
             sampled_plan_pr = torch.flatten(sampled_plan_pr, start_dim=-2, end_dim=-1)
         
         import pdb;pdb.set_trace()
-
-        """sampled_plan = pr_dist.rsample()  # sample from recognition net
-        if self.dist.dist == "discrete":
-            sampled_plan = torch.flatten(sampled_plan, start_dim=-2, end_dim=-1)"""
-
-        import pdb;pdb.set_trace()
-
-    """chk = get_last_checkpoint(Path.cwd())
-    import pdb;pdb.set_trace()
-
-    # Load Model
-    if chk is not None:
-        model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(chk.as_posix())
-        import pdb;pdb.set_trace()
-    else:
-        model = hydra.utils.instantiate(cfg.model)
-        if "pretrain_chk" in cfg:
-            initialize_pretrained_weights(model, cfg)
-
-    datamodule = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
-    log_rank_0(f"Training with the following config:\n{OmegaConf.to_yaml(cfg)}")
-    log_rank_0("Repo commit hash: {}".format(get_git_commit_hash(Path(hydra.utils.to_absolute_path(__file__)))))
-    log_rank_0(print_system_env_info())
-
-    #import pdb;pdb.set_trace()
-    train_logger = setup_logger(cfg, model)
-    #import pdb;pdb.set_trace()
-    callbacks = setup_callbacks(cfg.callbacks)
-    lr_logger = LearningRateMonitor(logging_interval="step")
-    callbacks.append(lr_logger)
-
-    trainer_args = {
-        **cfg.trainer,
-        "logger": train_logger,
-        "callbacks": callbacks,
-        "benchmark": False,
-    }
-
-    # Configure multi-GPU training
-    if is_multi_gpu_training(trainer_args["devices"]):
-        # increase default timeout for loading data into shared memory
-        trainer_args["strategy"] = DDPStrategy(find_unused_parameters=False, timeout=timedelta(seconds=3600))
-        if not cfg.slurm:
-            modify_argv_hydra()
-
-    trainer = Trainer(**trainer_args)
-
-    # Start training
-    trainer.fit(model, datamodule=datamodule, ckpt_path=chk)  # type: ignore"""
     pass
 
 
