@@ -40,7 +40,7 @@ def train(cfg: DictConfig) -> None:
     data_module = hydra.utils.instantiate(cfg.datamodule, training_repo_root=Path(hulc.__file__).parents[1])
     data_module.prepare_data()
     data_module.setup()
-    dataloader = data_module.train_dataloader()
+    dataloader = data_module.train_dataloader()["lang"]
     #dataset = dataloader.dataset.datasets["lang"]
     #device = torch.device(f"cuda:{device_id}")
 
