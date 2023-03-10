@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 import torch
 
+import numpy as np
 
 @hydra.main(config_path="../conf", config_name="config")
 def train(cfg: DictConfig) -> None:
@@ -49,16 +50,22 @@ def train(cfg: DictConfig) -> None:
     checkpoint = Path('/iliad/u/manasis/hulc/checkpoints/HULC_ABCD_D/saved_models/HULC_ABCD_D.ckpt')
     model = getattr(models_m, cfg.model["_target_"].split(".")[-1]).load_from_checkpoint(checkpoint.as_posix())
 
+    hulc_latent_observations = np.empty((1013110, 32, 1024))
+    hulc_actions = np.empty((1013110, 32, 7))
+    hulc_language = np.empty((1013110, 32, 4096))
+
     for i, batch in enumerate(dataloader):
         perceptual_emb = model.perceptual_encoder(
                 batch["rgb_obs"], batch["depth_obs"], batch["robot_obs"]
             )
+        seq_len = perceptual_emb.shape[1]
         latent_goal = model.language_goal(batch["lang"])
         
         # ------------Plan Proposal------------ #
         pp_state = model.plan_proposal(perceptual_emb[:, 0], latent_goal)
         pp_dist = model.dist.get_dist(pp_state)
         sampled_plan_pp = model.dist.sample_latent_plan(pp_dist)
+        sampled_plan_pp = sampled_plan_pp.unsqueeze(1).expand(-1, seq_len, -1)
 
         # ------------Plan Recognition------------ #
         pr_state, seq_feat = model.plan_recognition(perceptual_emb)
@@ -66,6 +73,7 @@ def train(cfg: DictConfig) -> None:
         sampled_plan_pr = pr_dist.rsample()  # sample from recognition net
         if model.dist.dist == "discrete":
             sampled_plan_pr = torch.flatten(sampled_plan_pr, start_dim=-2, end_dim=-1)
+        sampled_plan_pr = sampled_plan_pr.unsqueeze(1).expand(-1, seq_len, -1)
         
         import pdb;pdb.set_trace()
     pass

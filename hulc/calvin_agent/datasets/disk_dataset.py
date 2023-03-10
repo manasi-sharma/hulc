@@ -88,6 +88,7 @@ class DiskDataset(BaseDataset):
         episode = {key: np.stack([ep[key] for ep in episodes]) for key in keys}
         if self.with_lang:
             episode["language"] = self.lang_ann[self.lang_lookup[idx]][0]  # TODO check  [0]
+            import pdb;pdb.set_trace()
         return episode
 
     def _build_file_indices_lang(self, abs_datasets_dir: Path) -> Tuple[np.ndarray, List, np.ndarray]:
